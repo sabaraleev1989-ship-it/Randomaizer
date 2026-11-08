@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Страйкбол Сочи | Пульс — Рандомайзер</title>
+<style>
+  :root{
+    --red:#e10600;
+    --red-dark:#a80400;
+    --black:#0b0b0d;
+    --black-2:#141417;
+    --white:#ffffff;
+    --gray:#9a9aa2;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family:"Segoe UI", Roboto, Arial, sans-serif;
+    background:
+      radial-gradient(circle at 20% 0%, rgba(225,6,0,.18), transparent 45%),
+      radial-gradient(circle at 100% 100%, rgba(225,6,0,.12), transparent 40%),
+      var(--black);
+    color:var(--white);
+    display:flex;
+    justify-content:center;
+    padding:18px;
+    min-height:100vh;
+  }
+  .app{width:100%; max-width:520px;}
+
+  /* Шапка */
+  header{
+    display:flex; align-items:center; gap:12px;
+    border-bottom:3px solid var(--red);
+    padding-bottom:14px; margin-bottom:18px;
+  }
+  .logo{
+    width:46px;height:46px;flex:0 0 46px;
+    border-radius:50%;
+    background:var(--red);
+    display:grid;place-items:center;
+    font-weight:900;font-size:20px;
+    box-shadow:0 0 0 4px rgba(225,6,0,.25), 0 0 18px rgba(225,6,0,.55);
+    animation:pulse 1.6s infinite;
+  }
+  @keyframes pulse{
+    0%,100%{box-shadow:0 0 0 4px rgba(225,6,0,.25), 0 0 14px rgba(225,6,0,.45);}
+    50%{box-shadow:0 0 0 9px rgba(225,6,0,.10), 0 0 26px rgba(225,6,0,.85);}
+  }
+  .brand h1{
+    margin:0;font-size:17px;letter-spacing:.5px;text-transform:uppercase;
+  }
+  .brand h1 span{color:var(--red);}
+  .brand p{margin:2px 0 0;font-size:11px;color:var(--gray);letter-spacing:2px;text-transform:uppercase;}
+
+  /* Вкладки */
+  .tabs{display:flex;gap:8px;margin-bottom:16px;}
+  .tab{
+    flex:1;padding:11px 8px;text-align:center;cursor:pointer;
+    background:var(--black-2);border:2px solid #26262c;border-radius:12px;
+    font-size:13px;font-weight:700;letter-spacing:.4px;color:var(--gray);
+    transition:.18s; user-select:none;
+  }
+  .tab.active{
+    background:var(--red);border-color:var(--red);color:#fff;
+    box-shadow:0 0 16px rgba(225,6,0,.55);
+  }
+
+  .panel{display:none;}
+  .panel.active{display:block;animation:fade .22s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+  label{display:block;font-size:12px;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin:14px 0 6px;}
+  input, textarea{
+    width:100%;padding:13px 14px;border-radius:12px;
+    background:var(--black-2);border:2px solid #26262c;color:#fff;
+    font-size:16px;font-family:inherit;outline:none;transition:.18s;
+  }
+  input:focus,textarea:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(225,6,0,.18);}
+  textarea{resize:vertical;min-height:96px;letter-spacing:1px;}
+  .hint{font-size:12px;color:var(--gray);margin-top:6px;line-height:1.4;}
+
+  .row{display:flex;gap:12px;}
+  .row>div{flex:1;}
+
+  /* Кнопка */
+  .btn{
+    width:100%;margin-top:18px;padding:16px;border:none;border-radius:14px;cursor:pointer;
+    font-size:16px;font-weight:900;letter-spacing:2px;text-transform:uppercase;
+    color:#fff;background:linear-gradient(180deg,var(--red),var(--red-dark));
+    box-shadow:0 6px 0 #6d0200, 0 0 24px rgba(225,6,0,.45);
+    transition:.1s; user-select:none;
+  }
+  .btn:active{transform:translateY(5px);box-shadow:0 1px 0 #6d0200, 0 0 24px rgba(225,6,0,.45);}
+  .btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none;transform:none;}
+
+  /* Табло результата */
+  .result{
+    margin-top:22px;padding:28px 16px;border-radius:18px;text-align:center;
+    background:linear-gradient(160deg,#1b1b20,#0d0d10);
+    border:2px solid #26262c;position:relative;overflow:hidden;min-height:150px;
+    display:flex;flex-direction:column;justify-content:center;
+  }
+  .result::before{
+    content:"";position:absolute;inset:0;
+    background:radial-gradient(circle at 50% 50%, rgba(225,6,0,.20), transparent 65%);
+    opacity:0;transition:.3s;
+  }
+  .result.spin::before{opacity:1;animation:spinGlow .5s infinite alternate;}
+  @keyframes spinGlow{from{opacity:.25;}to{opacity:.9;}}
+  .result .label{font-size:11px;letter-spacing:3px;color:var(--gray);text-transform:uppercase;}
+  .result .number{
+    font-size:64px;font-weight:900;line-height:1.05;margin-top:6px;
+    color:#fff;text-shadow:0 0 26px rgba(225,6,0,.75);
+    word-break:break-word;
+  }
+  .result.spin .number{color:var(--red);}
+  .result .number.win{animation:win .5s ease;}
+  @keyframes win{0%{transform:scale(.7);opacity:0;}60%{transform:scale(1.12);}100%{transform:scale(1);}}
+
+  .history{margin-top:16px;}
+  .history h3{font-size:11px;letter-spacing:2px;color:var(--gray);text-transform:uppercase;margin:0 0 8px;}
+  .history-list{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip{
+    padding:7px 13px;border-radius:999px;background:var(--black-2);
+    border:1px solid #2c2c33;font-size:14px;font-weight:700;
+  }
+  .chip.new{border-color:var(--red);box-shadow:0 0 12px rgba(225,6,0,.5);}
+  .chip.bad{border-color:#444;color:#666;}
+
+  footer{margin-top:26px;text-align:center;font-size:11px;color:#55555e;letter-spacing:1.5px;}
+  footer span{color:var(--red);}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="logo">S</div>
+    <div class="brand">
+      <h1>Страйкбол Сочи <span>| Пульс</span></h1>
+      <p>Randomizer • Offline</p>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="range">Диапазон 1–100</div>
+    <div class="tab" data-tab="custom">Свои номера</div>
+  </div>
+
+  <!-- Диапазон -->
+  <div class="panel active" id="panel-range">
+    <div class="row">
+      <div>
+        <label>От</label>
+        <input type="number" id="min" value="1" inputmode="numeric">
+      </div>
+      <div>
+        <label>До</label>
+        <input type="number" id="max" value="100" inputmode="numeric">
+      </div>
+    </div>
+    <div class="hint">По умолчанию — случайное число от 1 до 100. Можно изменить границы.</div>
+  </div>
+
+  <!-- Свои номера -->
+  <div class="panel" id="panel-custom">
+    <label>Введите номера</label>
+    <textarea id="custom" placeholder="Например: 7, 12, 45, 88 или каждый с новой строки"></textarea>
+    <div class="hint">Разделяйте номера запятой, пробелом или переносом строки. Подходят любые значения.</div>
+  </div>
+
+  <button class="btn" id="roll">Определить номер</button>
+
+  <div class="result" id="result">
+    <div class="label">Результат</div>
+    <div class="number" id="number">—</div>
+  </div>
+
+  <div class="history">
+    <h3>История</h3>
+    <div class="history-list" id="history"><span class="chip bad">пусто</span></div>
+  </div>
+
+  <footer>СОЧИ <span>•</span> ПУЛЬС <span>•</span> СТРАЙКБОЛ</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var tabs      = document.querySelectorAll('.tab');
+  var panels    = { range: document.getElementById('panel-range'), custom: document.getElementById('panel-custom') };
+  var minEl     = document.getElementById('min');
+  var maxEl     = document.getElementById('max');
+  var customEl  = document.getElementById('custom');
+  var rollBtn   = document.getElementById('roll');
+  var resultBox = document.getElementById('result');
+  var numberEl  = document.getElementById('number');
+  var historyEl = document.getElementById('history');
+
+  var mode = 'range';
+  var history = [];
+
+  /* Переключение вкладок */
+  tabs.forEach(function(t){
+    t.addEventListener('click', function(){
+      tabs.forEach(function(x){ x.classList.remove('active'); });
+      t.classList.add('active');
+      mode = t.dataset.tab;
+      Object.keys(panels).forEach(function(k){
+        panels[k].classList.toggle('active', k === mode);
+      });
+    });
+  });
+
+  /* Парсинг своих номеров */
+  function parseCustom(){
+    var raw = customEl.value.trim();
+    if(!raw) return [];
+    return raw.split(/[\s,;]+/).filter(function(s){ return s.length > 0; });
+  }
+
+  /* Получение списка для выбора */
+  function getPool(){
+    if(mode === 'custom'){
+      return parseCustom();
+    }
+    var a = parseInt(minEl.value, 10);
+    var b = parseInt(maxEl.value, 10);
+    if(isNaN(a) || isNaN(b)) return [];
+    if(a > b){ var t = a; a = b; b = t; }
+    var arr = [];
+    // защита от слишком большого диапазона
+    var count = b - a + 1;
+    if(count > 100000) count = 100000;
+    for(var i = 0; i < count; i++) arr.push(a + i);
+    return arr;
+  }
+
+  /* Анимация прокрутки */
+  function animateRoll(pool, finalValue){
+    resultBox.classList.add('spin');
+    numberEl.classList.remove('win');
+    rollBtn.disabled = true;
+
+    var ticks = 0;
+    var total = 14 + Math.floor(Math.random() * 6);
+    var delay = 45;
+
+    function tick(){
+      var rnd = pool[Math.floor(Math.random() * pool.length)];
+      numberEl.textContent = rnd;
+      ticks++;
+      if(ticks < total){
+        delay += 12;
+        setTimeout(tick, delay);
+      } else {
+        resultBox.classList.remove('spin');
+        numberEl.textContent = finalValue;
+        numberEl.classList.add('win');
+        rollBtn.disabled = false;
+        addHistory(finalValue);
+      }
+    }
+    tick();
+  }
+
+  /* История */
+  function addHistory(value){
+    history.unshift(value);
+    if(history.length > 12) history.pop();
+    renderHistory();
+  }
+  function renderHistory(){
+    historyEl.innerHTML = '';
+    if(history.length === 0){
+      var e = document.createElement('span');
+      e.className = 'chip bad';
+      e.textContent = 'пусто';
+      historyEl.appendChild(e);
+      return;
+    }
+    history.forEach(function(v, i){
+      var c = document.createElement('span');
+      c.className = 'chip' + (i === 0 ? ' new' : '');
+      c.textContent = v;
+      historyEl.appendChild(c);
+    });
+  }
+
+  /* Основной запуск */
+  function roll(){
+    var pool = getPool();
+
+    if(pool.length === 0){
+      alert(mode === 'custom'
+        ? 'Введите хотя бы один номер.'
+        : 'Проверьте границы диапазона.');
+      return;
+    }
+
+    var finalValue = pool[Math.floor(Math.random() * pool.length)];
+    animateRoll(pool, finalValue);
+  }
+
+  rollBtn.addEventListener('click', roll);
+
+  /* Enter в поле своих номеров — запуск */
+  customEl.addEventListener('keydown', function(e){
+    if(e.key === 'Enter' && (e.ctrlKey || e.metaKey)) roll();
+  });
+
+  renderHistory();
+})();
+</script>
+</body>
+</html>
